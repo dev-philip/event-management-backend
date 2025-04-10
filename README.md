@@ -69,10 +69,6 @@ After running the deployment, check the /tmp/npm_error.log file for any error me
 
 npx knex migrate:make create_users_table
 
-## Create RSO Migration
-
-npx knex migrate:make create_rso_table
-
 ## Create university Migration
 
 npx knex migrate:make create_university_table
