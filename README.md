@@ -1,12 +1,6 @@
 # EventAppBackend
 
-Course Project for COP4710
-https://www.courseeventappfrontend.shop
-
-# Github Repository
-
-https://github.com/dev-philip/event-app-backend
-https://docs.google.com/document/d/1ynONMdP0S2a1tgvAOk-ozcSMURndsDTdifKDlSrmuqE/edit
+Course Project for CIS4004
 
 DD Endpoint : // "host": "event-app-db-project.ctjcr9a8iebf.us-east-1.rds.amazonaws.com",
 
