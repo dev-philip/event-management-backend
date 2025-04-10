@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Deployment started on `date`
+      - echo I am exiting pre_build
+  build:
+    commands:
+      - echo I got to the build stage
+      - npm install
+      - mkdir tmpappconfig
+      - aws s3 cp s3://event-backend-config-data/config.json tmpappconfig/
+      - aws s3 cp s3://event-backend-config-data/.env tmpappconfig/
+      - echo exiting the build stage
+  post_build:
+    commands:
+      - echo Deployment completed on `date`
+
+artifacts:
+  files:
+    - "**/*"

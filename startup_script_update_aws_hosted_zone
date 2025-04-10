@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Fetch the session token for IMDSv2
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+
+
+# Extract information about the Instance
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id/)
+AZ=$(curl -s curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/placement/availability-zone/)
+MY_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/public-ipv4/)
+
+# Extract tags associated with instance
+ZONE_TAG=$(aws ec2 describe-tags --region ${AZ::-1} --filters "Name=resource-id,Values=${INSTANCE_ID}" --query 'Tags[?Key==`AUTO_DNS_ZONE`].Value' --output text)
+NAME_TAG=$(aws ec2 describe-tags --region ${AZ::-1} --filters "Name=resource-id,Values=${INSTANCE_ID}" --query 'Tags[?Key==`AUTO_DNS_NAME`].Value' --output text)
+
+
+
+# Update Route 53 Record Set based on the Name tag to the current Public IP address of the Instance
+aws route53 change-resource-record-sets --hosted-zone-id $ZONE_TAG --change-batch '{"Changes":[{"Action":"UPSERT","ResourceRecordSet":{"Name":"'$NAME_TAG'","Type":"A","TTL":300,"ResourceRecords":[{"Value":"'$MY_IP'"}]}}]}'
+
+
+# output in log
+echo "Hosted zone updated on $(date) with new public IP: $PUBLIC_IP" >> /var/log/update_hosted_zone.log
+
+
+# Next step
+Make the Script Executable: chmod +x /home/ubuntu/update_hosted_zone.sh
+
+# Create the Systemd Service File: 
+sudo nano /etc/systemd/system/update-hosted-zone.service
+
+# Add the following :
+[Unit]
+Description=Update hosted with new public IP on startup
+After=network.target
+
+[Service]
+ExecStart=/home/ubuntu/update_hosted_zone.sh
+Type=oneshot
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+# Enable and start the service:
+sudo systemctl enable update-hosted-zone.service
+sudo systemctl start update-hosted-zone.service
+
+

@@ -1,7 +1,0 @@
-flask
-flask-cors
-python-dotenv
-flask-mysql-connector
-flask-sqlalchemy
-mysql-connector-python
-flask-migrate

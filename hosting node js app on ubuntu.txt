@@ -1,0 +1,77 @@
+`Install NVM`
+sudo apt update -y
+sudo apt install curl
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+source ~/.bashrc
+nvm install 20.9.0
+nvm use 20.9.0
+
+ `source ~/.bashrc` use this to refresh the terminal
+
+`Git comes with ubuntu`
+
+git clone https://github.com/dev-philip/event-app-backend.git
+
+install pm2
+`npm install -g pm2`
+
+
+start pm2
+`pm2 start npm --name eventapp -- start`
+
+or 
+
+`pm2 start ts-node -- src/app.ts;
+
+setup inbound rules for http and the port (custom) to the server the app is running on
+
+setup domain name with aws route 53
+http://entells.site:5656/
+
+Track dns propagations - https://dnschecker.org/#NS/entells.site
+
+Install SSL certificate on ubuntu
+
+sudo apt update
+sudo apt install certbot -y
+sudo apt install python3-certbot-nginx -y
+
+
+After installation, we might need to re-route traffic.
+
+4) sudo nano /etc/nginx/sites-available/entells.site
+
+server {
+    listen 80;
+    server_name entells.site www.entells.site;
+
+    location / {
+        proxy_pass http://54.159.9.218:5656;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+    }
+}
+
+Create a symbolic link to enable the site - 
+6) sudo ln -s /etc/nginx/sites-available/entells.site /etc/nginx/sites-enabled/
+
+sudo ln -s /etc/nginx/sites-available/courseeventapp.online /etc/nginx/sites-enabled/
+
+7) sudo nginx -t
+8) sudo systemctl restart nginx
+9) sudo certbot --nginx   (Certbot will modify the Nginx configuration file for entells.site to include SSL configurations and set up automatic renewals.)
+10) remove default sudo cd /etc/nginx/sites-available
+
+`sudo nano /etc/nginx/sites-available/default`
+
+
+
+/* install nginx */
+sudo apt install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+
+sudo systemctl status nginx

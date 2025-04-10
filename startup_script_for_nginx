@@ -1,0 +1,129 @@
+#!/bin/bash
+
+# Fetch the session token for IMDSv2
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+
+# Fetch the public IP address of the EC2 instance using the token
+PUBLIC_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
+# Define the Nginx configuration file path
+NGINX_CONF="/etc/nginx/sites-available/default"
+
+# Backup the current Nginx configuration file
+cp $NGINX_CONF ${NGINX_CONF}.bak
+
+# Update the Nginx configuration file with the new public IP address
+sed -i "s/server_name .*;/server_name $PUBLIC_IP;/g" $NGINX_CONF
+
+# Update the Nginx configuration file with the new public IP address for proxy_pass
+sed -i "s/proxy_pass http:\/\/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}:\([0-9]\{1,5\}\);/proxy_pass http:\/\/$PUBLIC_IP:\1;/g" $NGINX_CONF
+
+# Reload Nginx to apply the changes
+sudo systemctl reload nginx
+
+echo "Nginx configuration updated on $(date) with new public IP: $PUBLIC_IP" >> /var/log/update_nginx_ip.log
+
+# Next step
+Make the Script Executable: chmod +x /home/ubuntu/update_nginx_ip.sh
+
+
+# Create the Systemd Service File: 
+sudo nano /etc/systemd/system/update-nginx-ip.service
+
+# Add the following :
+[Unit]
+Description=Update Nginx with new public IP on startup
+After=network.target
+
+[Service]
+ExecStart=/home/ubuntu/update_nginx_ip.sh
+Type=oneshot
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+
+# Enable and start the service:
+sudo systemctl enable update-nginx-ip.service
+sudo systemctl start update-nginx-ip.service
+
+
+
+
+NGINX CONFIGURATION
+
+server {
+    server_name entells.site www.entells.site;
+
+    location / {
+        proxy_pass http://54.159.9.218:5656;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/entells.site/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/entells.site/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.entells.site) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = entells.site) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name entells.site www.entells.site;
+    return 404; # managed by Certbot
+
+}
+
+
+*************************************************************************************************************************************
+************************************************************************************************************************************
+server {
+    server_name 54.89.157.171;
+
+    location / {
+        proxy_pass http://54.89.157.171:5050;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/courseeventapp.online/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/courseeventapp.online/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.courseeventapp.online) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = courseeventapp.online) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name 54.89.157.171;
+    return 404; # managed by Certbot
+
+}
