@@ -2,9 +2,16 @@
 
 Course Project for CIS4004
 
-DD Endpoint : // "host": "event-app-db-project.ctjcr9a8iebf.us-east-1.rds.amazonaws.com",
+## HOW TO RUN THIS APPLICATION
 
-## how to start PM2
+1. Download NVM (Node version Manager) from this link `https://github.com/coreybutler/nvm-windows/releases/download/1.1.12/nvm-setup.exe`
+2. when Installed successfully open cmd and run this command `nvm install 20.9.0` It will install node version 20.9.0 on your system
+3. To confirm it was installed use the commmand `nvm ls` this will list all the version of node you have on your system and the one activated will have an (\* asterick in front if it).
+4. Clone repository
+5. Create a new file in the root directory called `.env` and `config.json`. It will contains all the credentials to run the project like MYSQL connection. You get that from the admin or you can create yours.
+6. Navigate to the root folder and run this command `npm install` then run `npm start`. this will start the backend server for the application
+
+## how to start PM2 on linux server
 
 `pm2 start npm --name eventapp -- start`
 
@@ -21,15 +28,6 @@ DD Endpoint : // "host": "event-app-db-project.ctjcr9a8iebf.us-east-1.rds.amazon
 `pm2 unstartup systemd`
 
 Writing init configuration in /etc/systemd/system/pm2-ubuntu.service
-
-## HOW TO RUN THIS APPLICATION
-
-1. Download NVM (Node version Manager) from this link `https://github.com/coreybutler/nvm-windows/releases/download/1.1.12/nvm-setup.exe`
-2. when Installed successfully open cmd and run this command `nvm install 20.9.0` It will install node version 20.9.0 on your system
-3. To confirm it was installed use the commmand `nvm ls` this will list all the version of node you have on your system and the one activated will have an (\* asterick in front if it).
-4. Clone repository `https://github.com/dev-philip/event-app-backend.git`
-5. Create a new file in the root directory called `.env`
-6. Navigate to the root folder and run this command `npm install` then run `npm start`. this will start the backend server for the application
 
 # Create migrations
 
@@ -52,19 +50,6 @@ npx knex seed:run
 
 npx knex migrate:down 20240317012804_create_category_table.ts
 
-## how to read codeploy log
-
-cd /opt/codedeploy-agent/deployment-root/deployment-logs/
-
-sudo touch codedeploy-agent-deployments.log
-
-nano /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
-
-sudo rm /opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log
-
-npm install 2>/tmp/npm_error.log
-After running the deployment, check the /tmp/npm_error.log file for any error messages that might provide clues to the issue
-
 ## Create user Migration
 
 npx knex migrate:make create_users_table
@@ -72,13 +57,8 @@ npx knex migrate:make create_users_table
 ## Create university Migration
 
 npx knex migrate:make create_university_table
-npx knex migrate:make create_rsomember_table
 
 npx knex migrate:up 20240317012804_create_category_table.ts
-npx knex migrate:up 20240317014359_create_comment_table.ts
-
-Download Redis for Windows
-github.com/tporadowski/redis/releases
 
 ## Set up start script on Linux
 
